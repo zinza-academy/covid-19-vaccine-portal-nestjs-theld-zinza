@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
 import { UserModule } from './modules/user/user.module';
 import { ConfigModule } from '@nestjs/config';
 
@@ -20,6 +19,7 @@ import { ConfigModule } from '@nestjs/config';
       database: process.env.MYSQL_DATABASE,
       synchronize: true,
       autoLoadEntities: true,
+      entities: ['./entities/*.entity{.ts,.js}'],
     }),
     UserModule,
   ],

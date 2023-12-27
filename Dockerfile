@@ -7,6 +7,7 @@ RUN apk update && apk add yarn
 
 COPY . .
 
+RUN npm i -g @nestjs/cli
 RUN yarn install
 
 CMD ["yarn", "run", "start:dev"]
