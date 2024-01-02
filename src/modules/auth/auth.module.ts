@@ -5,10 +5,15 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
+import { MailModule } from '../mail/mail.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ForgotPasswordToken } from 'src/entities/forgotPasswordToken.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([ForgotPasswordToken]),
     UserModule,
+    MailModule,
     PassportModule,
     JwtModule.register({
       secret: process.env.AUTH_KEY,

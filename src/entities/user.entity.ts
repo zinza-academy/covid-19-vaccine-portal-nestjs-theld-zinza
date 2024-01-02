@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ForgotPasswordToken } from './forgotPasswordToken.entity';
 
 export enum GENDER {
   male = 1,
@@ -53,4 +54,7 @@ export class User {
     default: ROLE.user,
   })
   role: number;
+
+  @OneToMany(() => ForgotPasswordToken, (fpwToken) => fpwToken.user)
+  fpwToken: ForgotPasswordToken[];
 }

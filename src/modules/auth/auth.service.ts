@@ -8,12 +8,23 @@ import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
+import { MailService } from '../mail/mail.service';
+import { ForgotPasswordDto } from './dto/forgotPassword';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import * as dayjs from 'dayjs';
+import { ForgotPasswordToken } from 'src/entities/forgotPasswordToken.entity';
+import { v4 as uuid } from 'uuid';
+import { UpdatePasswordDto } from './dto/updatePassword';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectRepository(ForgotPasswordToken)
+    protected forgotPasswordRepository: Repository<ForgotPasswordToken>,
     protected userService: UserService,
     protected jwtService: JwtService,
+    protected mailService: MailService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -23,8 +34,9 @@ export class AuthService {
       throw new BadRequestException('Email already exists');
     }
 
-    const salt = await bcrypt.genSalt();
-    createUserDto.password = await bcrypt.hash(createUserDto.password, salt);
+    createUserDto.password = await this.createHashedPassword(
+      createUserDto.password,
+    );
 
     const user = await this.userService.create(createUserDto);
 
@@ -55,5 +67,70 @@ export class AuthService {
       user: result,
       token,
     };
+  }
+
+  async forgotPassword(payload: ForgotPasswordDto) {
+    const user = await this.userService.findOneByEmail(payload.email);
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid email');
+    }
+
+    const token = uuid();
+    const now = dayjs().format('YYYY-MM-DD HH:mm:ss');
+
+    const fpwToken = this.forgotPasswordRepository.create({
+      token: token,
+      createdAt: now,
+    });
+
+    fpwToken.user = user;
+    await this.forgotPasswordRepository.save(fpwToken);
+
+    await this.mailService.sendUserForgotPasswordMail(user, token);
+
+    return true;
+  }
+
+  async updatePassword(payload: UpdatePasswordDto) {
+    const result = await this.forgotPasswordRepository.findOne({
+      where: {
+        token: payload.token,
+      },
+      relations: {
+        user: true,
+      },
+    });
+
+    if (!result) {
+      throw new BadRequestException('Invalid token');
+    }
+
+    const isMatch = await bcrypt.compare(
+      payload.oldPassword,
+      result.user.password,
+    );
+
+    if (!isMatch) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    if (payload.password != payload.rePassword) {
+      throw new BadRequestException(
+        'Password and retype password do not match',
+      );
+    }
+
+    const newPassword = await this.createHashedPassword(payload.password);
+    this.userService.update(result.user.id, { password: newPassword });
+    this.forgotPasswordRepository.remove(result);
+
+    return true;
+  }
+
+  async createHashedPassword(password: string) {
+    const salt = await bcrypt.genSalt();
+    password = await bcrypt.hash(password, salt);
+    return password;
   }
 }

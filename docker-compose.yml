@@ -25,6 +25,15 @@ services:
       - ${MYSQL_HOST_PORT}:${MYSQL_PORT}
     networks:
       - nest-network
+  mailhog:
+    image: mailhog/mailhog
+    logging:
+      driver: 'none'
+    ports:
+      - 1025:1025
+      - 8025:8025
+    networks:
+      - nest-network
 
 volumes:
   mysql-vol:
