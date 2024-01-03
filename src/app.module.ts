@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtService } from '@nestjs/jwt';
 import { MailModule } from './modules/mail/mail.module';
+import { VaccinationPlaceModule } from './modules/vaccination-place/vaccination-place.module';
 
 @Module({
   imports: [
@@ -22,11 +23,12 @@ import { MailModule } from './modules/mail/mail.module';
       database: process.env.MYSQL_DATABASE,
       synchronize: true,
       autoLoadEntities: true,
-      entities: ['./entities/*.entity{.ts,.js}'],
+      entities: ['/entities/*.entity{.ts,.js}'],
     }),
     UserModule,
     AuthModule,
     MailModule,
+    VaccinationPlaceModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtService],
