@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { VaccinationRegistration } from './vaccinationRegistration.entity';
 
 @Entity('vaccinationPlace')
 export class VaccinationPlace {
@@ -19,4 +20,7 @@ export class VaccinationPlace {
 
   @Column('int')
   tableAvailable: number;
+
+  @OneToMany(() => VaccinationRegistration, (registration) => registration.user)
+  registrations: VaccinationRegistration[];
 }

@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ForgotPasswordToken } from './forgotPasswordToken.entity';
+import { VaccinationRegistration } from './vaccinationRegistration.entity';
 
 export enum GENDER {
   male = 1,
@@ -57,4 +58,7 @@ export class User {
 
   @OneToMany(() => ForgotPasswordToken, (fpwToken) => fpwToken.user)
   fpwToken: ForgotPasswordToken[];
+
+  @OneToMany(() => VaccinationRegistration, (registration) => registration.user)
+  registrations: VaccinationRegistration[];
 }

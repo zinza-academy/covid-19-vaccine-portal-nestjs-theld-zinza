@@ -8,6 +8,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { JwtService } from '@nestjs/jwt';
 import { MailModule } from './modules/mail/mail.module';
 import { VaccinationPlaceModule } from './modules/vaccination-place/vaccination-place.module';
+import { VaccinationRegistrationModule } from './modules/vaccination-registration/vaccination-registration.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { VaccinationPlaceModule } from './modules/vaccination-place/vaccination-
     AuthModule,
     MailModule,
     VaccinationPlaceModule,
+    VaccinationRegistrationModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtService],
