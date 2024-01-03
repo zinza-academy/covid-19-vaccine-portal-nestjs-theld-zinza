@@ -12,6 +12,9 @@ export class ForgotPasswordToken {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column('int')
+  userId: number;
+
   @Column({ length: 255 })
   token: string;
 

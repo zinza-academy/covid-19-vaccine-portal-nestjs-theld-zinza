@@ -1,3 +1,4 @@
+import { User } from 'src/entities/user.entity';
 import {
   BadRequestException,
   Injectable,
@@ -16,6 +17,7 @@ import * as dayjs from 'dayjs';
 import { ForgotPasswordToken } from 'src/entities/forgotPasswordToken.entity';
 import { v4 as uuid } from 'uuid';
 import { UpdatePasswordDto } from './dto/updatePassword';
+import { UserUpdatePasswordDto } from './dto/userUpdatePassword';
 
 @Injectable()
 export class AuthService {
@@ -27,24 +29,24 @@ export class AuthService {
     protected mailService: MailService,
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
-    const isExist = await this.userService.findOneByEmail(createUserDto.email);
+  async register(data: CreateUserDto) {
+    const isExist = await this.userService.findOne({
+      email: data.email,
+    });
 
     if (isExist) {
       throw new BadRequestException('Email already exists');
     }
 
-    createUserDto.password = await this.createHashedPassword(
-      createUserDto.password,
-    );
-
-    const user = await this.userService.create(createUserDto);
+    data.password = await this.createHashedPassword(data.password);
+    const user = await this.userService.create(data);
+    delete user.password;
 
     return user;
   }
 
   async login(payload: LoginDto) {
-    const user = await this.userService.findOneByEmail(payload.email);
+    const user = await this.userService.findOne({ email: payload.email }, true);
 
     if (!user) {
       throw new UnauthorizedException('Invalid email');
@@ -70,7 +72,7 @@ export class AuthService {
   }
 
   async forgotPassword(payload: ForgotPasswordDto) {
-    const user = await this.userService.findOneByEmail(payload.email);
+    const user = await this.userService.findOne({ email: payload.email }, true);
 
     if (!user) {
       throw new UnauthorizedException('Invalid email');
@@ -97,19 +99,14 @@ export class AuthService {
       where: {
         token: payload.token,
       },
-      relations: {
-        user: true,
-      },
     });
 
     if (!result) {
       throw new BadRequestException('Invalid token');
     }
 
-    const isMatch = await bcrypt.compare(
-      payload.oldPassword,
-      result.user.password,
-    );
+    const user = await this.userService.findOne({ id: result.userId }, true);
+    const isMatch = await bcrypt.compare(payload.oldPassword, user.password);
 
     if (!isMatch) {
       throw new UnauthorizedException('Invalid password');
@@ -122,7 +119,7 @@ export class AuthService {
     }
 
     const newPassword = await this.createHashedPassword(payload.password);
-    this.userService.update(result.user.id, { password: newPassword });
+    this.userService.updatePassword(user.id, newPassword);
     this.forgotPasswordRepository.remove(result);
 
     return true;
@@ -132,5 +129,18 @@ export class AuthService {
     const salt = await bcrypt.genSalt();
     password = await bcrypt.hash(password, salt);
     return password;
+  }
+
+  async useUpdatePassword(userId: number, payload: UserUpdatePasswordDto) {
+    if (payload.password != payload.rePassword) {
+      throw new BadRequestException(
+        'Password and retype password do not match',
+      );
+    }
+
+    const newPassword = await this.createHashedPassword(payload.password);
+    this.userService.updatePassword(userId, newPassword);
+
+    return true;
   }
 }

@@ -8,6 +8,7 @@ import {
   MaxLength,
   MinLength,
 } from '@nestjs/class-validator';
+import { Transform } from 'class-transformer';
 import { GENDER } from 'src/entities/user.entity';
 
 export class CreateUserDto {
@@ -19,6 +20,7 @@ export class CreateUserDto {
   @IsEmail()
   @IsNotEmpty()
   @MaxLength(320)
+  @Transform(({ value }) => value.toLocaleLowerCase())
   email: string;
 
   @IsString()
@@ -43,16 +45,7 @@ export class CreateUserDto {
 
   @IsNumber()
   @IsNotEmpty()
-  provinceId: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  districtId: number;
-
-  @IsNumber()
-  @IsNotEmpty()
   wardId: number;
 
-  @IsNumber({})
   role: number;
 }

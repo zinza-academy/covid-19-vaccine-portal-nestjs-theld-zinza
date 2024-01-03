@@ -23,7 +23,7 @@ export class User {
   @Column({ unique: true, length: 100 })
   email: string;
 
-  @Column({ length: 255 })
+  @Column({ length: 255, select: false })
   password: string;
 
   @Column({ length: 20 })
@@ -39,12 +39,6 @@ export class User {
     enum: GENDER,
   })
   gender: number;
-
-  @Column('int')
-  provinceId: number;
-
-  @Column('int')
-  districtId: number;
 
   @Column('int')
   wardId: number;

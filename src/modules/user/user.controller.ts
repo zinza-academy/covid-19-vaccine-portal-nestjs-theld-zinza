@@ -1,41 +1,48 @@
 import {
   Controller,
   Get,
-  Body,
   Param,
-  Delete,
+  UseGuards,
+  Query,
+  Put,
   UsePipes,
   ValidationPipe,
-  Put,
-  UseGuards,
+  Body,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AdminGuard } from 'src/guards/admin.guard';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from 'src/entities/user.entity';
 
-@UseGuards(JwtAuthGuard)
+export interface userSearchParams {
+  page: number;
+  limit: number;
+  name?: string;
+  citizenCode?: string;
+}
+
 @Controller('users')
+@UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  @UseGuards(AdminGuard)
+  findAll(@Query() params: userSearchParams) {
+    return this.userService.findAll(params);
   }
 
   @Get(':id')
+  @UseGuards(AdminGuard)
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+    return this.userService.findOne({ id: +id });
   }
 
-  @Put(':id')
-  @UsePipes(new ValidationPipe())
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  @Put('update-info')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  update(@Body() updateUserDto: UpdateUserDto, @CurrentUser() user: User) {
+    return this.userService.update(user.id, updateUserDto);
   }
 }

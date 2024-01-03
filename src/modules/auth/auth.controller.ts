@@ -19,6 +19,9 @@ import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { ForgotPasswordDto } from './dto/forgotPassword';
 import { UpdatePasswordDto } from './dto/updatePassword';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { ROLE, User } from 'src/entities/user.entity';
+import { UserUpdatePasswordDto } from './dto/userUpdatePassword';
 
 @Controller('auth')
 export class AuthController {
@@ -28,11 +31,12 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  @UsePipes(new ValidationPipe())
+  @UsePipes(new ValidationPipe({ whitelist: true }))
   async register(@Body() data: CreateUserDto) {
-    const result = await this.userService.create(data);
+    data.role = ROLE.user;
+    const result = await this.authService.register(data);
 
-    return { data: result };
+    return result;
   }
 
   @Post('login')
@@ -50,11 +54,16 @@ export class AuthController {
 
   @Get('logout')
   @UseGuards(JwtAuthGuard)
-  @UsePipes(new ValidationPipe())
   async logout(@Res({ passthrough: true }) response: Response) {
     response.cookie('access_token', '');
 
-    return null;
+    return true;
+  }
+
+  @Get('info')
+  @UseGuards(JwtAuthGuard)
+  getInfo(@CurrentUser() user: User) {
+    return user;
   }
 
   @Post('forgot-password')
@@ -68,9 +77,19 @@ export class AuthController {
 
   @Put('forgot-password')
   @UsePipes(new ValidationPipe())
-  async updatePassword(@Body() data: UpdatePasswordDto) {
+  async updateForgotPassword(@Body() data: UpdatePasswordDto) {
     const result = await this.authService.updatePassword(data);
 
     return result;
+  }
+
+  @Put('update-password')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  updatePassword(
+    @Body() updateUserDto: UserUpdatePasswordDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.authService.useUpdatePassword(user.id, updateUserDto);
   }
 }
