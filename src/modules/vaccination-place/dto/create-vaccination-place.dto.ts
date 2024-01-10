@@ -10,10 +10,6 @@ export class CreateVaccinationPlaceDto {
   @MaxLength(255)
   address: string;
 
-  @IsNumber()
-  @IsNotEmpty()
-  wardId: number;
-
   @IsString()
   @MaxLength(255)
   managerName: string;

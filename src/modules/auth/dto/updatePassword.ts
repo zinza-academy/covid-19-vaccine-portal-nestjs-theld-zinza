@@ -9,11 +9,6 @@ export class UpdatePasswordDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(8)
-  oldPassword: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(8)
   password: string;
 
   @IsString()

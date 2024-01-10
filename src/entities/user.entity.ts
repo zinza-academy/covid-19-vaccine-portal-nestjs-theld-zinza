@@ -4,7 +4,7 @@ import { VaccinationRegistration } from './vaccinationRegistration.entity';
 
 export enum GENDER {
   male = 1,
-  female = 2,
+  female = 0,
 }
 
 export enum ROLE {

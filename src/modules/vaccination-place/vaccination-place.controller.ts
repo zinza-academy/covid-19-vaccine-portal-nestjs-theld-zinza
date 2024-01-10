@@ -43,6 +43,11 @@ export class VaccinationPlaceController {
     return this.vaccinationPlaceService.paginate(params);
   }
 
+  @Get('all')
+  getAll() {
+    return this.vaccinationPlaceService.getAll();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.vaccinationPlaceService.findOne(+id);

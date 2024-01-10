@@ -10,6 +10,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new FormatResponseInterceptor());
   app.use(cookieParser());
+  app.enableCors({ origin: ['http://ldt.ldt:3000'], credentials: true });
 
   await app.listen(3000);
 }

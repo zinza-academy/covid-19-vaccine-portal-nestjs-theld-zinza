@@ -21,7 +21,8 @@ import { AdminGuard } from 'src/guards/admin.guard';
 export interface vaccinationRegistrationSearchParams {
   page: number;
   limit: number;
-  status?: string;
+  name?: string;
+  citizenCode?: string;
 }
 
 @Controller('vaccination-registration')

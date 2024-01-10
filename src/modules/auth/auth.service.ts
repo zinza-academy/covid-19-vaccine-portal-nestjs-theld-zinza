@@ -106,11 +106,6 @@ export class AuthService {
     }
 
     const user = await this.userService.findOne({ id: result.userId }, true);
-    const isMatch = await bcrypt.compare(payload.oldPassword, user.password);
-
-    if (!isMatch) {
-      throw new UnauthorizedException('Invalid password');
-    }
 
     if (payload.password != payload.rePassword) {
       throw new BadRequestException(

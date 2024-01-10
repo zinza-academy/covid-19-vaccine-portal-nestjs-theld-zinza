@@ -2,9 +2,8 @@ import { Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { CreateVaccinationRegistrationDto } from './dto/create-vaccination-registration.dto';
 import { UpdateVaccinationRegistrationDto } from './dto/update-vaccination-registration.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { VaccinationRegistration } from 'src/entities/vaccinationRegistration.entity';
-import { Pagination, paginate } from 'nestjs-typeorm-paginate';
 import { vaccinationRegistrationSearchParams } from './vaccination-registration.controller';
 
 @Injectable({ scope: Scope.REQUEST })
@@ -20,20 +19,26 @@ export class VaccinationRegistrationService {
     return await this.VaccinationRegistrationRepository.save(registration);
   }
 
-  async findAll(
-    options: vaccinationRegistrationSearchParams,
-    userId?: number,
-  ): Promise<Pagination<VaccinationRegistration>> {
-    const search = {
-      ...(userId && { where: [{ userId }] }),
-      relations: ['user', 'place'],
-    };
+  async findAll(options: vaccinationRegistrationSearchParams, userId?: number) {
+    const [items, total] =
+      await this.VaccinationRegistrationRepository.findAndCount({
+        take: options.limit || 10,
+        skip: (options.page || 0) * (options.limit || 10),
+        where: {
+          user: {
+            id: userId,
+            fullName: options.name ? ILike(`%${options.name}%`) : undefined,
+            citizenCode: options.citizenCode
+              ? ILike(`%${options.citizenCode}%`)
+              : undefined,
+          },
+        },
+        relations: {
+          user: {},
+        },
+      });
 
-    return paginate<VaccinationRegistration>(
-      this.VaccinationRegistrationRepository,
-      options,
-      search,
-    );
+    return { items, total };
   }
 
   async findOne(id: number) {

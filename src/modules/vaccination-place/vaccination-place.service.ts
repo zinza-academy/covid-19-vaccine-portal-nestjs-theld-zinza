@@ -4,7 +4,6 @@ import { UpdateVaccinationPlaceDto } from './dto/update-vaccination-place.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 import { VaccinationPlace } from 'src/entities/vaccinationPlace.entity';
-import { Pagination, paginate } from 'nestjs-typeorm-paginate';
 import { vaccinationPlaceSearchParams } from './vaccination-place.controller';
 
 @Injectable()
@@ -20,21 +19,21 @@ export class VaccinationPlaceService {
     return await this.VaccinationPlaceRepository.save(place);
   }
 
-  async paginate(
-    options: vaccinationPlaceSearchParams,
-  ): Promise<Pagination<VaccinationPlace>> {
-    const search = (options.name || options.address) && {
-      where: [
-        { name: ILike(`%${options.name}%`) },
-        { address: ILike(`%${options.address}%`) },
-      ],
-    };
+  async getAll() {
+    return await this.VaccinationPlaceRepository.find();
+  }
 
-    return paginate<VaccinationPlace>(
-      this.VaccinationPlaceRepository,
-      options,
-      search,
-    );
+  async paginate(options: vaccinationPlaceSearchParams) {
+    const [items, total] = await this.VaccinationPlaceRepository.findAndCount({
+      take: options.limit || 10,
+      skip: (options.page || 0) * (options.limit || 10),
+      where: {
+        name: options.name ? ILike(`%${options.name}%`) : undefined,
+        address: options.address ? ILike(`%${options.address}%`) : undefined,
+      },
+    });
+
+    return { items, total };
   }
 
   async findOne(id: number) {

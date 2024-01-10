@@ -12,9 +12,6 @@ export class VaccinationPlace {
   @Column({ length: 255 })
   address: string;
 
-  @Column('int')
-  wardId: number;
-
   @Column({ length: 255 })
   managerName: string;
 
