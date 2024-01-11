@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { District } from './district.entity';
+import { User } from './user.entity';
 
 @Entity()
 export class Ward {
@@ -10,4 +18,10 @@ export class Ward {
 
   @Column('int')
   districtId: number;
+
+  @ManyToOne(() => District, (district) => district.wards)
+  district: District;
+
+  @OneToMany(() => User, (users) => users.ward)
+  users: User[];
 }

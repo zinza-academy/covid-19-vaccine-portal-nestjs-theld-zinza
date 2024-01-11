@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { VaccinationPlace } from './vaccinationPlace.entity';
+import { VaccineType } from './vaccine-type.entity';
 
 @Entity('vaccinationRegistration')
 export class VaccinationRegistration {
@@ -58,4 +59,8 @@ export class VaccinationRegistration {
   @ManyToOne(() => VaccinationPlace, (place) => place.registrations)
   @JoinColumn({ name: 'vaccinationPlaceId' })
   place: VaccinationPlace;
+
+  @ManyToOne(() => VaccineType, (place) => place.registrations)
+  @JoinColumn({ name: 'vaccineTypeId' })
+  vaccineType: VaccineType;
 }

@@ -66,4 +66,13 @@ export class UserService {
 
     return result;
   }
+
+  async getCert(id: number) {
+    const result = await this.userRepository.findOne({
+      where: { id },
+      relations: ['ward.district.province', 'registrations.vaccineType'],
+    });
+
+    return result;
+  }
 }

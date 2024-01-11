@@ -1,6 +1,7 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ForgotPasswordToken } from './forgotPasswordToken.entity';
 import { VaccinationRegistration } from './vaccinationRegistration.entity';
+import { Ward } from './ward.entity';
 
 export enum GENDER {
   male = 1,
@@ -55,4 +56,7 @@ export class User {
 
   @OneToMany(() => VaccinationRegistration, (registration) => registration.user)
   registrations: VaccinationRegistration[];
+
+  @ManyToOne(() => Ward, (ward) => ward.users)
+  ward: Ward;
 }

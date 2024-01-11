@@ -60,11 +60,13 @@ export class ImportExcelService {
           };
         }
 
-        wards.push({
-          id: +data[6],
-          name: data[5],
-          districtId: +data[4],
-        });
+        if (+data[6]) {
+          wards.push({
+            id: +data[6],
+            name: data[5],
+            districtId: +data[4],
+          });
+        }
       });
 
       await DataSource.initialize();

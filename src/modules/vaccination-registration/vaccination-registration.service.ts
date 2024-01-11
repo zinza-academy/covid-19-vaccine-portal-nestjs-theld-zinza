@@ -16,7 +16,13 @@ export class VaccinationRegistrationService {
   async create(data: CreateVaccinationRegistrationDto) {
     const registration = this.VaccinationRegistrationRepository.create(data);
 
-    return await this.VaccinationRegistrationRepository.save(registration);
+    const result =
+      await this.VaccinationRegistrationRepository.save(registration);
+
+    return await this.VaccinationRegistrationRepository.findOne({
+      where: { id: result.id },
+      relations: ['user', 'user.ward.district.province'],
+    });
   }
 
   async findAll(options: vaccinationRegistrationSearchParams, userId?: number) {
@@ -32,6 +38,9 @@ export class VaccinationRegistrationService {
               ? ILike(`%${options.citizenCode}%`)
               : undefined,
           },
+        },
+        order: {
+          id: 'DESC',
         },
         relations: {
           user: {},

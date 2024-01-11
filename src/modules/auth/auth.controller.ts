@@ -92,4 +92,10 @@ export class AuthController {
   ) {
     return this.authService.useUpdatePassword(user.id, updateUserDto);
   }
+
+  @Get('certificate')
+  @UseGuards(JwtAuthGuard)
+  getCert(@CurrentUser() user: User) {
+    return this.userService.getCert(+user.id);
+  }
 }
